@@ -7,8 +7,8 @@ Method  | text | fax  | Csrc | Excl | SPRC | tech | poem | html | list | man  | 
 --------|------|------|------|------|------|------|------|------|------|------|------
 bzip2-9 | 2.27 | 0.78 | 2.18 | 1.01 | 2.70 | 2.02 | 2.42 | 2.48 | 2.79 | 3.33 | 2.53
 bzip2-1 | 2.42 | 0.78 | 2.18 | 0.96 | 2.70 | 2.34 | 2.72 | 2.48 | 2.79 | 3.33 | 2.65
-cmp5*    | 2.41 | 0.81 | 2.34 | 1.42 | 2.80 | 2.31 | 2.73 | 2.60 | 2.96 | 3.50 | 2.71
-*= options: (-bwt65535 -mtf1 -rle0 -huffman)
+cmp5\*    | 2.41 | 0.81 | 2.34 | 1.42 | 2.80 | 2.31 | 2.73 | 2.60 | 2.96 | 3.50 | 2.71
+\* options: (-bwt65535 -mtf1 -rle0 -huffman)
 
 License
 ========
@@ -22,7 +22,6 @@ Building
 cd compress
 cmake .
 make
-cmp5
 </pre>
 
 G++ 4.7 / VS2013 or higher (for C++11) will be needed to compile CoMPres5. Support for std::filesystem (via std::tr2::filesystem) is needed. For installing G++ 4.7 see [here](http://lektiondestages.blogspot.de/2013/05/installing-and-switching-gccg-versions.html).
@@ -31,16 +30,16 @@ Usage
 ========
 
 <pre>
-cmp5 [-c, -d, -t] [options] <infile> [outfile]
+cmp5 [-c, -d, -t] [options] infile [outfile]
 </pre>
 
 **Available options (you must specify -c, -d or -t):**  
-**-c** Compress data from **<infile>** to **<outfile>**.  
-**-d** Decompress data from **<infile>** to **<outfile>**.  
-**-t** Test routines by compressing/decompressing data from **<infile>** in memory.  
+**-c** Compress data from **infile** to **outfile**.  
+**-d** Decompress data from **infile** to **outfile**.  
+**-t** Test routines by compressing/decompressing data from **infile** in memory.  
 **-b** Benchmark compression and decompression.  
 **-v** Be verbose.  
-Use **\"random\"** for **<infile>** to generate random input data.  
+Use **\"random\"** for **infile** to generate random input data.  
 
 **Available pre-processing options (optional):**  
 **-rgbSplit** Split R8G8B8 data into color planes (size must be divisible by 3).  
@@ -53,12 +52,18 @@ Use **\"random\"** for **<infile>** to generate random input data.
 **-huffman** Use static Huffman entropy coder.  
 
 **Examples:**  
-cmp5 -c -huffman ./canterbury/alice29.txt ./alice29.cmp5 (compress file)  
-cmp5 -d ./alice29.cmp5 ./canterbury/alice29_2.txt (decompress file)  
-cmp5 -t -bwt -huffman ./canterbury/alice29.txt (test routines)  
-cmp5 -c -huffman ./canterbury ./compressed (compress files in directory)  
-cmp5 -c -huffman ./test/*.txt (compress files matching wildcards)  
-cmp5 -c -v -huffman random (compress random generated data and be verbose)  
+Compress single file:
+<pre>cmp5 -c -huffman ./canterbury/alice29.txt ./alice29.cmp5</pre>
+Decompress single file:
+<pre>cmp5 -d ./alice29.cmp5 ./canterbury/alice29_2.txt</pre>  
+Test routines:
+<pre>cmp5 -t -bwt -huffman ./canterbury/alice29.txt</pre> 
+Compress all files in directory:
+<pre>cmp5 -c -huffman ./canterbury ./compressed</pre>  
+Compress all files matching wildcards:
+<pre>cmp5 -c -huffman ./test/*.txt</pre>
+Test random generated data and be verbose:
+<pre>cmp5 -t -v -huffman random</pre>
 
 I found a bug or have a suggestion
 ========
