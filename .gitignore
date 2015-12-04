@@ -44,3 +44,9 @@ Temporary Items
 
 # Build directories
 build/
+Debug/
+Release/
+
+# Test data directories
+canterbury/
+silesia/

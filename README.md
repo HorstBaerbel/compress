@@ -1,14 +1,14 @@
 CoMPres5
 ========
-(short cmp5) is a collection of lossless compression algorithms and meant as a testbed mainly for trying out lossless image compression techniques for [NerDisco](https://github.com/HorstBaerbel/NerDisco) and [res2h](https://github.com/HorstBaerbel/res2h). It includes delta encoding, Burrows-Wheeler transform, move-to-front encoding, zero run-length encoding and a static huffman encoder. I plan to improve rle0 compression (better algorithm) and BWT transform speed (using suffix arrays), add code for adaptive Huffman, LZSS, LZ4 and to try out a inter-frame compression technique for images.  
-Compression ratios are in the range of bzip2 (as-in: not really stellar). The results for the [Canterbury corpus](http://corpus.canterbury.ac.nz/descriptions/#cantrbry):  
+(short cmp5) is a collection of lossless compression algorithms and meant as a testbed mainly for trying out lossless image compression techniques for [NerDisco](https://github.com/HorstBaerbel/NerDisco) and [res2h](https://github.com/HorstBaerbel/res2h). It includes delta encoding, Burrows-Wheeler transform, move-to-front encoding, zero run-length encoding and a static huffman encoder. I plan to improve BWT transform speed (using suffix arrays), add code for adaptive Huffman, LZSS, LZ4 and to try out a inter-frame compression technique for images.  
+Compression ratios are in the range of bzip2 (as-in: not really stellar). The algorithms were tested with the [Canterbury corpus](http://corpus.canterbury.ac.nz/descriptions/#cantrbry) and the [Silesia corpus](http://sun.aei.polsl.pl/~sdeor/index.php?page=silesia). The results for the [Canterbury corpus](http://corpus.canterbury.ac.nz/descriptions/#cantrbry):  
 
 Method  | text | fax  | Csrc | Excl | SPRC | tech | poem | html | list | man  | play
 --------|------|------|------|------|------|------|------|------|------|------|------
 bzip2-9 | 2.27 | 0.78 | 2.18 | 1.01 | 2.70 | 2.02 | 2.42 | 2.48 | 2.79 | 3.33 | 2.53
 bzip2-1 | 2.42 | 0.78 | 2.18 | 0.96 | 2.70 | 2.34 | 2.72 | 2.48 | 2.79 | 3.33 | 2.65
-cmp5\*    | 2.41 | 0.81 | 2.34 | 1.42 | 2.80 | 2.31 | 2.73 | 2.60 | 2.96 | 3.50 | 2.71
-\* options: (-bwt65535 -mtf1 -rle0 -huffman)
+cmp5\*    | 2.37 | 0.79 | 2.28 | 1.43 | 2.80 | 2.25 | 2.66 | 2.56 | 2.90 | 3.44 | 2.66
+\* options: (-t -bwt65535 -mtf1 -rle0 -huffman)
 
 License
 ========
@@ -39,7 +39,7 @@ cmp5 [-c, -d, -t] [options] infile [outfile]
 **-t** Test routines by compressing/decompressing data from **infile** in memory.  
 **-b** Benchmark compression and decompression.  
 **-v** Be verbose.  
-Use **\"random\"** for **infile** to generate random input data.  
+Use **"random""** for **infile** to generate random input data.  
 
 **Available pre-processing options (optional):**  
 **-rgbSplit** Split R8G8B8 data into color planes (size must be divisible by 3).  

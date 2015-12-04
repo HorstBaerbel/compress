@@ -417,6 +417,10 @@ int run()
 			//when we get here, everything was fine for all files
 			return 0;
 		}
+		else
+		{
+			std::cout << "File or directory \"" << m_inputPath << "\" not found!" << std::endl;
+		}
 	}
 	return -2;
 }
@@ -445,7 +449,7 @@ void printUsage()
 	std::cout << "-bwt[block size] Apply Burrows-Wheeler transform. Block size is optional," << std::endl;
 	std::cout << "                 e.g. \"-bwt1024\" (Default is 65535, max. is 16MB)." << std::endl;
 	std::cout << "-mtf1 Apply move-to-front-1 encoding." << std::endl;
-	std::cout << "-rle0 Apply (naive) zero run-length encoding." << std::endl;
+	std::cout << "-rle0 Apply zero run-length encoding." << std::endl;
 	std::cout << "Available entropy coders (optional):" << std::endl;
 	std::cout << "-huffman Use static Huffman entropy coder." << std::endl;
 	//std::cout << "-ahuffman Use adaptive Huffman entropy coder." << std::endl;

@@ -6,6 +6,15 @@
 namespace Tools
 {
 
+	uint32_t log2(uint32_t value)
+	{
+		uint32_t r = (value > 0xFFFF) << 4; value >>= r;
+		uint32_t shift = (value > 0xFF) << 3; value >>= shift; r |= shift;
+		shift = (value > 0xF) << 2; value >>= shift; r |= shift;
+		shift = (value > 0x3) << 1; value >>= shift; r |= shift;
+		return r | (value >> 1);
+	}
+
 	/// similar to: http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
 	uint32_t highestBitSet(uint32_t value)
 	{

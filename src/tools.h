@@ -15,6 +15,11 @@ namespace Tools
 	/// This is not as safe as CRC-32 (see here: https://en.wikipedia.org/wiki/Adler-32), but should be totally sufficient for us.
 	uint32_t calculateAdler32(const std::vector<uint8_t> & dest, uint32_t adler = 1);
 
+	/// @brief Calculate integer log2 of value rounded up.
+	/// @param value Input value.
+	/// @return Return ceil(log2(value)).
+	uint32_t log2(uint32_t value);
+
 	/// @brief Highest bit position set to 1 in the value.
 	/// @param value Input value.
 	/// @return Return the highest bit set to 1 (0-31).
