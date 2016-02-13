@@ -1,6 +1,6 @@
 CoMPres5
 ========
-(short cmp5) is a collection of lossless compression algorithms and meant as a testbed mainly for trying out lossless image compression techniques for [NerDisco](https://github.com/HorstBaerbel/NerDisco) and [res2h](https://github.com/HorstBaerbel/res2h). It includes delta encoding, Burrows-Wheeler transform, move-to-front encoding, zero run-length encoding and a static huffman encoder. I plan to improve BWT transform speed (using suffix arrays), add code for adaptive Huffman, LZSS, LZ4 and to try out a inter-frame compression technique for images.  
+(short cmp5) is a collection of lossless compression algorithms and meant as a testbed mainly for trying out lossless image compression techniques for [NerDisco](https://github.com/HorstBaerbel/NerDisco) and [res2h](https://github.com/HorstBaerbel/res2h). It includes delta encoding, Burrows-Wheeler transform, move-to-front encoding, zero run-length encoding and a static huffman entropy encoder. I plan to add code for adaptive Huffman, LZSS, LZ4 and to try out a inter-frame compression technique for images.  
 Compression ratios are in the range of bzip2 (as-in: not really stellar). The algorithms were tested with the [Canterbury corpus](http://corpus.canterbury.ac.nz/descriptions/#cantrbry) and the [Silesia corpus](http://sun.aei.polsl.pl/~sdeor/index.php?page=silesia). The results for the [Canterbury corpus](http://corpus.canterbury.ac.nz/descriptions/#cantrbry):  
 
 Method  | text | fax  | Csrc | Excl | SPRC | tech | poem | html | list | man  | play
@@ -8,11 +8,12 @@ Method  | text | fax  | Csrc | Excl | SPRC | tech | poem | html | list | man  | 
 bzip2-9 | 2.27 | 0.78 | 2.18 | 1.01 | 2.70 | 2.02 | 2.42 | 2.48 | 2.79 | 3.33 | 2.53
 bzip2-1 | 2.42 | 0.78 | 2.18 | 0.96 | 2.70 | 2.34 | 2.72 | 2.48 | 2.79 | 3.33 | 2.65
 cmp5\*    | 2.37 | 0.79 | 2.28 | 1.43 | 2.80 | 2.25 | 2.66 | 2.56 | 2.90 | 3.44 | 2.66
-\* options: (-t -bwt65535 -mtf1 -rle0 -huffman)
+\* options: "-t -bwt65535 -mtf1 -rle0 -huffman", which is more or less equal to bzip2 with the "-1" (fast) option.
 
 License
 ========
 [BSD-2-Clause](http://opensource.org/licenses/BSD-2-Clause), see [LICENSE.md](LICENSE.md).  
+[SAIS-lite](https://sites.google.com/site/yuta256/sais) is used for suffix array generation. See [sais/COPYING](sais/COPYING).
 
 Building
 ========
@@ -39,17 +40,17 @@ cmp5 [-c, -d, -t] [options] infile [outfile]
 **-t** Test routines by compressing/decompressing data from **infile** in memory.  
 **-b** Benchmark compression and decompression.  
 **-v** Be verbose.  
-Use **"random""** for **infile** to generate random input data.  
+Use **"random"** for **infile** to generate random input data.  
 
 **Available pre-processing options (optional):**  
-**-rgbSplit** Split R8G8B8 data into color planes (size must be divisible by 3).  
-**-delta** Apply delta-encoding.  
-**-bwt[block size]** Apply Burrows-Wheeler transform. Block size is optional, e.g. **\"-bwt1024\"** (Default is 65535, max. is 16MB).  
+**-rgbSplit** Split R8G8B8 data into RRR...GGG...BBB... color planes (size must be divisible by 3).  
+**-delta** Apply delta-encoding on consecutive bytes.  
+**-bwt[block size]** Apply Burrows-Wheeler transform. Block size in bytes is optional, e.g. **"-bwt1024"** (Default is 256kB, max. is 16MB).  
 **-mtf1** Apply move-to-front-1 encoding.  
-**-rle0** Apply (naive) zero run-length encoding.  
+**-rle0** Apply zero run-length encoding.  
 
 **Available entropy coders (optional):**  
-**-huffman** Use static Huffman entropy coder.  
+**-huffman** Use static Huffman entropy coder.   
 
 **Examples:**  
 Compress single file:

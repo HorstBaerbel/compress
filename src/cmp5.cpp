@@ -3,6 +3,7 @@
 #include "huffman_codec.h"
 #include "delta_codec.h"
 #include "bwt_codec.h"
+//#include "lzss_codec.h"
 #include "mtf1_codec.h"
 #include "rgb2planes_codec.h"
 #include "rle0_codec.h"
@@ -219,7 +220,7 @@ int test(const std::tr2::sys::path & input)
 		comp.setVerboseOutput(m_beVerbose);
 		if (m_beVerbose) std::cout << "Compressing..." << std::endl;
 		//record start time
-		const uint32_t testCount = m_doBenchmark ? 1000 : 1;
+		const uint32_t testCount = m_doBenchmark ? 10 : 1;
 		auto startTime = std::chrono::steady_clock::now();
 		//do compression
 		std::vector<uint8_t> compressedData;
@@ -257,14 +258,22 @@ int test(const std::tr2::sys::path & input)
 				std::cout << "Decompression took " << millis / (float)testCount << "ms." << std::endl;
 			}
 			//compare size and binary data
-			if (source.size() == decompressedData.size() && std::equal(source.cbegin(), source.cend(), decompressedData.cbegin()))
+			if (source.size() == decompressedData.size())
 			{
-				if (m_beVerbose) std::cout << "Compress/Decompress run worked." << std::endl;
-				return 0;
+				if (std::equal(source.cbegin(), source.cend(), decompressedData.cbegin()))
+				{
+					if (m_beVerbose) std::cout << "Compress/Decompress run worked." << std::endl;
+					return 0;
+				}
+				else
+				{
+					const auto mismatchIt = std::mismatch(source.cbegin(), source.cend(), decompressedData.cbegin());
+					std::cout << "Decompressed data does not match input data at byte " << std::distance(decompressedData.cbegin(), mismatchIt.second) << "!" << std::endl;
+				}
 			}
 			else
 			{
-				std::cout << "Decompressed data does not match input data!" << std::endl;
+				std::cout << "Decompressed data size does not match!" << std::endl;
 			}
 			return -3;
 		}
@@ -447,11 +456,12 @@ void printUsage()
 	std::cout << "-rgbSplit Split R8G8B8 data into color planes (size must be divisible by 3)." << std::endl;
 	std::cout << "-delta Apply delta-encoding." << std::endl;
 	std::cout << "-bwt[block size] Apply Burrows-Wheeler transform. Block size is optional," << std::endl;
-	std::cout << "                 e.g. \"-bwt1024\" (Default is 65535, max. is 16MB)." << std::endl;
+	std::cout << "                 e.g. \"-bwt1024\" (Default is 65535, max. is 16MB - 1Byte)." << std::endl;
 	std::cout << "-mtf1 Apply move-to-front-1 encoding." << std::endl;
 	std::cout << "-rle0 Apply zero run-length encoding." << std::endl;
 	std::cout << "Available entropy coders (optional):" << std::endl;
 	std::cout << "-huffman Use static Huffman entropy coder." << std::endl;
+	//std::cout << "-lzss Use LZSS entropy coder." << std::endl;
 	//std::cout << "-ahuffman Use adaptive Huffman entropy coder." << std::endl;
 	std::cout << "Examples:" << std::endl;
 	std::cout << "cmp5 -c -huffman ./canterbury/alice29.txt ./alice29.cmp5 (compress file)" << std::endl;
@@ -537,7 +547,7 @@ bool readArguments(int argc, const char * argv[])
 					{
 						//check if the string can be converted to a number
 						const uint32_t blockSize = std::stoul(blockString);
-						if (blockSize > 0 && blockSize <= 16 * 1024 * 1024)
+						if (blockSize > 0 && blockSize < 16 * 1024 * 1024 - 1)
 						{
 							bwtCodec->setBlockSizeForCompression(blockSize);
 						}
@@ -566,6 +576,18 @@ bool readArguments(int argc, const char * argv[])
 				}
 				continue;
 			}
+// 			else if (argument == "-lzss")
+// 			{
+// 				if (m_mode == CompressMode::Compress || m_mode == CompressMode::Test)
+// 				{
+// 					m_codecs.push_back(I_Codec::SPtr(LZSS::Create()));
+// 				}
+// 				else
+// 				{
+// 					std::cout << "Not compressing. Ignoring \"" << argument << "\"." << std::endl;
+// 				}
+// 				continue;
+// 			}
 			//none of the options was matched until here so we must be past the options
 			pastOptions = true;
 		}

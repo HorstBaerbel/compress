@@ -26,7 +26,7 @@ public:
 	virtual std::string codecName() const override;
 
 	/// @brief Set the block size used for compression.
-	/// @param blockSize Block size for compression
+	/// @param blockSize Block size for compression. The allowed maximum is 16MB - 1, due to algorithm restrictions.
 	void setBlockSizeForCompression(const uint32_t blockSize = 256*1024);
 
 	/// @brief Apply Burrows-Wheeler transform to data.

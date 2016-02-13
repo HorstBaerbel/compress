@@ -38,6 +38,7 @@ set(TARGET_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/mtf1_codec.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/rgb2planes_codec.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/rle0_codec.h
+	${CMAKE_CURRENT_SOURCE_DIR}/sais/sais.hxx
 	${CMAKE_CURRENT_SOURCE_DIR}/src/tools.h
 )
 

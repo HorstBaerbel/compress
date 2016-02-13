@@ -4,6 +4,10 @@
 #include <numeric>
 #include <algorithm>
 #include <array>
+#include <iostream>
+#include <fstream>
+#include <iosfwd>
+#include "../sais/sais.hxx"
 
 
 const uint8_t Bwt::CodecIdentifier = 40;
@@ -25,7 +29,8 @@ Bwt * Bwt::Create()
 
 void Bwt::setBlockSizeForCompression(const uint32_t blockSize)
 {
-	m_blockSize = blockSize;
+	//clamp to 16MB - 1
+	m_blockSize = blockSize > 16 * 1024 * 1024 - 1 ? 16 * 1024 * 1024 - 1 : blockSize;
 }
 
 std::vector<uint8_t> Bwt::encode(const std::vector<uint8_t> & source) const
@@ -43,7 +48,7 @@ std::vector<uint8_t> Bwt::encode(const std::vector<uint8_t> & source) const
 		*((uint32_t *)&dest[destIndex]) = m_blockSize;
 		destIndex += 4;
 		//build array of indices into source array
-		std::vector<uint32_t> indices(m_blockSize);
+		std::vector<int32_t> indices(2 * m_blockSize);
 		//allocate array for block data storage and easier access
 		std::vector<uint8_t> block(2 * m_blockSize);
 		//loop through blocks
@@ -52,29 +57,38 @@ std::vector<uint8_t> Bwt::encode(const std::vector<uint8_t> & source) const
 		{
 			//clamp block size so we don't read past the end of source
 			const uint32_t size = (srcIndex + m_blockSize) > srcSize ? (srcSize - srcIndex) : m_blockSize;
-			//copy data into block twice so can read it easier when we'd need to wrap around...
-			std::copy(std::next(source.cbegin(), srcIndex), std::next(source.cbegin(), srcIndex + size), block.begin());
-			std::copy(std::next(source.cbegin(), srcIndex), std::next(source.cbegin(), srcIndex + size), std::next(block.begin(), size));
-			//initialize index array with consecutive indices
-			std::iota(indices.begin(), std::next(indices.begin(), size), 0);
-			//sort rotated block data and thus index data lexicographically
-			std::stable_sort(indices.begin(), std::next(indices.begin(), size),
-								  [&block, &size](const uint32_t & a, const uint32_t & b) {
-								  return std::memcmp(&block[a], &block[b], size) < 0; });
-// 				return std::lexicographical_compare(std::next(block.cbegin(), a), std::next(block.cbegin(), a + size), 
-// 																std::next(block.cbegin(), b), std::next(block.cbegin(), b + size)); });
-			//find start of initial string in sorted array by finding the index value 0 in the array
-			const uint32_t startIndex = static_cast<uint32_t>(std::distance(indices.cbegin(), std::find(indices.cbegin(), std::next(indices.cbegin(), size), 0)));
-			//output start index
-			*((uint32_t *)&dest[destIndex]) = startIndex;
+			//copy data into block in reverse order and duplicate it. this makes it possible to write the data 
+			//with increasing indices when decoding. also the suffix array algorithm will generate un-decodable data
+			//when using only a single block of data. the generated indices are screwed up.
+			//If you know the correct way to sort the string without needing to duplicate indices, please let me know!
+			std::reverse_copy(std::next(source.cbegin(), srcIndex), std::next(source.cbegin(), srcIndex + size), block.begin());
+			std::reverse_copy(std::next(source.cbegin(), srcIndex), std::next(source.cbegin(), srcIndex + size), std::next(block.begin(), size));
+			//build suffix array from data
+ 			saisxx<uint8_t *, int32_t *, int32_t>(block.data(), indices.data(), 2 * size, 256);
+			//store reference to start index for writing it later
+			uint32_t & startIndex = ((uint32_t &)dest[destIndex]);
 			destIndex += 4;
-			//output last byte of all sorted strings
-			for (uint32_t i = 0; i < size; ++i)
+			//encode data to output while looking for start index
+			uint32_t count = 0;
+			for (uint32_t i = 0; i < 2 * size; ++i)
 			{
-				//store last character of rotated string
-				const uint32_t index = indices[i] + (size - 1);
-				dest[destIndex++] = block[index];
+				uint32_t index = static_cast<uint32_t>(indices[i]);
+				//we have duplicated the input data, thus we only need to use indices that are "from the first half"
+				if (index < size)
+				{
+					//check if we've found the start index
+					if (index == 0)
+					{
+						//yes. store it and copy last input symbol to output
+						startIndex = count;
+						index = size;
+					}
+					//store symbol from input data to output data
+					dest[destIndex++] = block[index - 1];
+					count++;
+				}
 			}
+			//move to next block of input data
 			srcIndex += size;
 		}
 		dest.resize(destIndex);
@@ -83,6 +97,9 @@ std::vector<uint8_t> Bwt::encode(const std::vector<uint8_t> & source) const
 	return std::vector<uint8_t>();
 }
 
+/// @brief Three BWT-inversion algorithms are described very well in this paper: Space-Time trade-offs in the Burrows-Wheeler transform
+/// Here, a variation of the algorithm "bw94" is used, while the input data has been reversed in the encoder
+/// and thus the output can be written front-to-back in contrary to the original algorithm.
 std::vector<uint8_t> Bwt::decode(const std::vector<uint8_t> & source) const
 {
 	const uint32_t srcSize = static_cast<uint32_t>(source.size());
@@ -98,48 +115,47 @@ std::vector<uint8_t> Bwt::decode(const std::vector<uint8_t> & source) const
 		//read BWT block size
 		const uint32_t blockSize = *((uint32_t *)&source[srcIndex]);
 		srcIndex += 4;
-		//array for storing how many symbols lexicographically less than symbol exist
-		std::vector<uint32_t> predecessors(256);
-		//array for storing how often a symbol source[index] occurs before index in source
-		std::vector<uint32_t> occurrenceBefore(blockSize);
+		//array for storing accumulated character frequencies
+		std::vector<uint32_t> C(256);
+		//inverse transform array
+		std::vector<uint32_t> T(blockSize);
 		//loop through blocks
 		while (srcIndex < srcSize)
 		{
 			//read start index from data first
-			uint32_t index = *((uint32_t *)&source[srcIndex]);
+			const uint32_t startIndex = *((uint32_t *)&source[srcIndex]);
 			srcIndex += 4;
 			//clamp block size so we don't read past the end of source
 			const uint32_t size = (srcIndex + blockSize) > srcSize ? (srcSize - srcIndex) : blockSize;
 			//set up pointer to start of data
 			const uint8_t * blockData = &source[srcIndex];
-			//clear arrays storing symbol occurrence information
-			std::fill(predecessors.begin(), predecessors.end(), 0);
-			//count symbol occurrences and store number of symbol occurrences before position
+			//clear array storing symbol frequency information
+			std::fill(C.begin(), C.end(), 0);
+			//count symbol counts and build inverse transform array
 			for (uint32_t i = 0; i < size; ++i)
 			{
-				const uint8_t symbol = blockData[i];
-				occurrenceBefore[i] = predecessors[symbol];
-				predecessors[symbol]++;
+				T[i] = C[blockData[i]]++;
 			}
-			//store number of symbols lexicographically less than symbol
-			uint32_t currentSum = 0;
-			for (uint32_t symbol = 0; symbol < 256; ++symbol)
+			//sum counts
+			for (uint32_t symbol = 1; symbol < 256; ++symbol)
 			{
-				uint32_t symbolCount = predecessors[symbol];
-				predecessors[symbol] = currentSum;
-				currentSum += symbolCount;
+				C[symbol] += C[symbol - 1];
 			}
-			//move destination index to end of array, the BWT is reconstructed in reverse order...
-			destIndex += size;
+			//shit counts right
+			for (uint32_t symbol = 255; symbol > 0; --symbol)
+			{
+				C[symbol] = C[symbol - 1];
+			}
+			C[0] = 0;
 			//undo the BWT by reading symbol, then looking up next index through transform arrays
+			uint32_t index = startIndex;
 			for (uint32_t i = 0; i < size; ++i)
 			{
 				const uint8_t symbol = blockData[index];
-				dest[--destIndex] = symbol;
-				index = occurrenceBefore[index] + predecessors[symbol];
+				dest[destIndex++] = symbol;
+				index = T[index] + C[symbol];
 			}
 			srcIndex += size;
-			destIndex += size;
 		}
 		return dest;
 	}
