@@ -36,7 +36,7 @@ Usage
 cmp5 [-c, -d, -t] [options] infile [outfile]
 </pre>
 
-**Available options (you must specify -c, -d or -t):**
+**Available options (you must specify -c, -d or -t):**  
 Option | Description |
 --------|------|
 **-c** | Compress data from **infile** to **outfile**
@@ -46,7 +46,7 @@ Option | Description |
 **-b** | Benchmark compression and decompression
 **"random"** | use for **infile** to generate random input data
 
-**Available pre-processing options (optional):**
+**Available pre-processing options (optional):**  
 Option | Description |
 --------|------|
 **-rgbSplit** | Split R8G8B8 data into RRR...GGG...BBB... color planes (size must be divisible by 3)
@@ -55,7 +55,7 @@ Option | Description |
 **-mtf1** | Apply move-to-front-1 encoding
 **-rle0** | Apply zero run-length encoding
 
-**Available entropy coders (optional):**
+**Available entropy coders (optional):**  
 Option | Description |
 --------|------|
 **-huffman** | Use static Huffman entropy coder
