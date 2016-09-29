@@ -7,10 +7,10 @@ Method  | text | fax  | Csrc | Excl | SPRC | tech | poem | html | list | man  | 
 --------|------|------|------|------|------|------|------|------|------|------|------
 bzip2-9 | 2.27 | 0.78 | 2.18 | 1.01 | 2.70 | 2.02 | 2.42 | 2.48 | 2.79 | 3.33 | 2.53
 bzip2-1 | 2.42 | 0.78 | 2.18 | 0.96 | 2.70 | 2.34 | 2.72 | 2.48 | 2.79 | 3.33 | 2.65
-cmp5\*    | 2.37 | 0.79 | 2.28 | 1.43 | 2.80 | 2.25 | 2.66 | 2.56 | 2.90 | 3.44 | 2.66
-cmp5\**   | 3.99 | 1.68 | 2.92 | 2.78 | 3.89 | 3.89 | 4.56 | 3.77 | 3.88 | 4.45 | 4.36
-\* options: "-t -bwt65535 -mtf1 -rle0 -huffman", which is more or less equal to bzip2 with the "-1" (fast) option.
-\** options: "-t -lzss32768" (32k dictionary, 4k look-ahead buffer)
+cmp5<sup>1</sup>    | 2.37 | 0.79 | 2.28 | 1.43 | 2.80 | 2.25 | 2.66 | 2.56 | 2.90 | 3.44 | 2.66
+cmp5<sup>2</sup>   | 3.99 | 1.68 | 2.92 | 2.78 | 3.89 | 3.89 | 4.56 | 3.77 | 3.88 | 4.45 | 4.36
+<sup>1</sup> options: "-t -bwt65535 -mtf1 -rle0 -huffman", which is more or less equal to bzip2 with the "-1" (fast) option.  
+<sup>2</sup> options: "-t -lzss32768" (32k dictionary, 4k look-ahead buffer)
 
 License
 ========
@@ -36,24 +36,30 @@ Usage
 cmp5 [-c, -d, -t] [options] infile [outfile]
 </pre>
 
-**Available options (you must specify -c, -d or -t):**  
-**-c** Compress data from **infile** to **outfile**.  
-**-d** Decompress data from **infile** to **outfile**.  
-**-t** Test routines by compressing/decompressing data from **infile** in memory.  
-**-b** Benchmark compression and decompression.  
-**-v** Be verbose.  
-Use **"random"** for **infile** to generate random input data.  
+**Available options (you must specify -c, -d or -t):**
+Option | Description |
+-|-|
+**-c** | Compress data from **infile** to **outfile**
+**-d** | Decompress data from **infile** to **outfile**
+**-t** | Test routines by compressing/decompressing data from **infile** in memory
+**-v** | Be verbose
+**-b** | Benchmark compression and decompression
+**"random"** | use for **infile** to generate random input data
 
-**Available pre-processing options (optional):**  
-**-rgbSplit** Split R8G8B8 data into RRR...GGG...BBB... color planes (size must be divisible by 3).  
-**-delta** Apply delta-encoding on consecutive bytes.  
-**-bwt[block size]** Apply Burrows-Wheeler transform. Block size in bytes is optional, e.g. **"-bwt1024"** (Default is 256kB, max. is 16MB).  
-**-mtf1** Apply move-to-front-1 encoding.  
-**-rle0** Apply zero run-length encoding.  
+**Available pre-processing options (optional):**
+Option | Description |
+-|-|
+**-rgbSplit** | Split R8G8B8 data into RRR...GGG...BBB... color planes (size must be divisible by 3)
+**-delta** | Apply delta-encoding on consecutive bytes
+**-bwt[block size]** | Apply Burrows-Wheeler transform. Block size in bytes is optional, e.g. **"-bwt1024"** (Default is 256kB, max. is 16MB)
+**-mtf1** | Apply move-to-front-1 encoding
+**-rle0** | Apply zero run-length encoding
 
-**Available entropy coders (optional):**  
-**-huffman** Use static Huffman entropy coder.   
-**-lzss** Use LZSS entropy encoder. Dictionary size is optional, e.g. **"-lzss16384" (Default is 4k, look-ahead buffer size is 1/8 of dictionary size)
+**Available entropy coders (optional):**
+Option | Description |
+-|-|
+**-huffman** | Use static Huffman entropy coder
+**-lzss** | Use LZSS entropy encoder. Dictionary size is optional, e.g. **"-lzss16384" (Default is 4k, look-ahead buffer size is 1/8 of dictionary size)
 
 **Examples:**  
 Compress single file:
