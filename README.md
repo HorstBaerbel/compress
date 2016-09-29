@@ -37,29 +37,32 @@ cmp5 [-c, -d, -t] [options] infile [outfile]
 </pre>
 
 **Available options (you must specify -c, -d or -t):**  
-Option | Description |
---------|------|
-**-c** | Compress data from **infile** to **outfile**
-**-d** | Decompress data from **infile** to **outfile**
-**-t** | Test routines by compressing/decompressing data from **infile** in memory
-**-v** | Be verbose
-**-b** | Benchmark compression and decompression
+
+Option       | Description
+-------------|------------
+**-c**       | Compress data from **infile** to **outfile**
+**-d**       | Decompress data from **infile** to **outfile**
+**-t**       | Test routines by compressing/decompressing data from **infile** in memory
+**-v**       | Be verbose
+**-b**       | Benchmark compression and decompression
 **"random"** | use for **infile** to generate random input data
 
 **Available pre-processing options (optional):**  
-Option | Description |
---------|------|
-**-rgbSplit** | Split R8G8B8 data into RRR...GGG...BBB... color planes (size must be divisible by 3)
-**-delta** | Apply delta-encoding on consecutive bytes
+
+Option               | Description
+---------------------|------------
+**-rgbSplit**        | Split R8G8B8 data into RRR...GGG...BBB... color planes (size must be divisible by 3)
+**-delta**           | Apply delta-encoding on consecutive bytes
 **-bwt[block size]** | Apply Burrows-Wheeler transform. Block size in bytes is optional, e.g. **"-bwt1024"** (Default is 256kB, max. is 16MB)
-**-mtf1** | Apply move-to-front-1 encoding
-**-rle0** | Apply zero run-length encoding
+**-mtf1**            | Apply move-to-front-1 encoding
+**-rle0**            | Apply zero run-length encoding
 
 **Available entropy coders (optional):**  
-Option | Description |
---------|------|
+
+Option       | Description
+-------------|------------
 **-huffman** | Use static Huffman entropy coder
-**-lzss** | Use LZSS entropy encoder. Dictionary size is optional, e.g. **"-lzss16384" (Default is 4k, look-ahead buffer size is 1/8 of dictionary size)
+**-lzss**    | Use LZSS entropy encoder. Dictionary size is optional, e.g. **"-lzss16384" (Default is 4k, look-ahead buffer size is 1/8 of dictionary size)
 
 **Examples:**  
 Compress single file:
