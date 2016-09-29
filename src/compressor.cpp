@@ -3,7 +3,7 @@
 #include "huffman_codec.h"
 #include "delta_codec.h"
 #include "bwt_codec.h"
-//#include "lzss_codec.h"
+#include "lzss_codec.h"
 #include "mtf1_codec.h"
 #include "rgb2planes_codec.h"
 #include "rle0_codec.h"
@@ -16,12 +16,12 @@ const uint32_t Compressor::MagicHeader = 0x434D5035; //"CMP5" == "CoMPre5sor" da
 
 const std::map<uint8_t, I_Codec::Creator> Compressor::m_codecs = {
 	std::make_pair(Bwt::CodecIdentifier, (I_Codec::Creator)Bwt::Create),
-	std::make_pair(Delta::CodecIdentifier, Delta::Create),
-	std::make_pair(StaticHuffman::CodecIdentifier, StaticHuffman::Create),
-//	std::make_pair(LZSS::CodecIdentifier, LZSS::Create),
-	std::make_pair(Mtf1::CodecIdentifier, Mtf1::Create),
-	std::make_pair(RgbToPlanes::CodecIdentifier, RgbToPlanes::Create),
-	std::make_pair(Rle0::CodecIdentifier, Rle0::Create)};
+	std::make_pair(Delta::CodecIdentifier, (I_Codec::Creator)Delta::Create),
+	std::make_pair(StaticHuffman::CodecIdentifier, (I_Codec::Creator)StaticHuffman::Create),
+	std::make_pair(LZSS::CodecIdentifier, (I_Codec::Creator)LZSS::Create),
+	std::make_pair(Mtf1::CodecIdentifier, (I_Codec::Creator)Mtf1::Create),
+	std::make_pair(RgbToPlanes::CodecIdentifier, (I_Codec::Creator)RgbToPlanes::Create),
+	std::make_pair(Rle0::CodecIdentifier, (I_Codec::Creator)Rle0::Create) };
 
 void Compressor::setVerboseOutput(bool verbose)
 {

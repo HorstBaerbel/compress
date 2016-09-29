@@ -27,7 +27,7 @@ public:
 
 	/// @brief Set the block size used for compression.
 	/// @param blockSize Block size for compression. The allowed maximum is 16MB - 1, due to algorithm restrictions.
-	void setBlockSizeForCompression(const uint32_t blockSize = 256*1024);
+	void setCompressionParameters(const uint32_t blockSize = 256*1024);
 
 	/// @brief Apply Burrows-Wheeler transform to data.
 	/// @param source Source data.

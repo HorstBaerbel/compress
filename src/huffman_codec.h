@@ -22,7 +22,7 @@ public:
 
 	/// @brief Create a new codec instance.
 	/// @return Return codec instance.
-	static I_Codec * Create();
+	static StaticHuffman * Create();
 
 	/// @brief Codec identifier.
 	/// @return Codec identifier.

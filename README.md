@@ -1,6 +1,6 @@
 CoMPres5
 ========
-(short cmp5) is a collection of lossless compression algorithms and meant as a testbed mainly for trying out lossless image compression techniques for [NerDisco](https://github.com/HorstBaerbel/NerDisco) and [res2h](https://github.com/HorstBaerbel/res2h). It includes delta encoding, Burrows-Wheeler transform, move-to-front encoding, zero run-length encoding and a static huffman entropy encoder. I plan to add code for adaptive Huffman, LZSS, LZ4 and to try out a inter-frame compression technique for images.  
+(short cmp5) is a collection of lossless compression algorithms and meant as a testbed mainly for trying out lossless image compression techniques for [NerDisco](https://github.com/HorstBaerbel/NerDisco) and [res2h](https://github.com/HorstBaerbel/res2h). It includes delta encoding, Burrows-Wheeler transform, move-to-front encoding, zero run-length encoding, a static huffman and LZSS entropy encoder. I plan to add code for adaptive Huffman, LZ4 and to try out a inter-frame compression technique for images.  
 Compression ratios are in the range of bzip2 (as-in: not really stellar). The algorithms were tested with the [Canterbury corpus](http://corpus.canterbury.ac.nz/descriptions/#cantrbry) and the [Silesia corpus](http://sun.aei.polsl.pl/~sdeor/index.php?page=silesia). The results for the [Canterbury corpus](http://corpus.canterbury.ac.nz/descriptions/#cantrbry):  
 
 Method  | text | fax  | Csrc | Excl | SPRC | tech | poem | html | list | man  | play
@@ -8,7 +8,9 @@ Method  | text | fax  | Csrc | Excl | SPRC | tech | poem | html | list | man  | 
 bzip2-9 | 2.27 | 0.78 | 2.18 | 1.01 | 2.70 | 2.02 | 2.42 | 2.48 | 2.79 | 3.33 | 2.53
 bzip2-1 | 2.42 | 0.78 | 2.18 | 0.96 | 2.70 | 2.34 | 2.72 | 2.48 | 2.79 | 3.33 | 2.65
 cmp5\*    | 2.37 | 0.79 | 2.28 | 1.43 | 2.80 | 2.25 | 2.66 | 2.56 | 2.90 | 3.44 | 2.66
+cmp5\**   | 3.99 | 1.68 | 2.92 | 2.78 | 3.89 | 3.89 | 4.56 | 3.77 | 3.88 | 4.45 | 4.36
 \* options: "-t -bwt65535 -mtf1 -rle0 -huffman", which is more or less equal to bzip2 with the "-1" (fast) option.
+\** options: "-t -lzss32768" (32k dictionary, 4k look-ahead buffer)
 
 License
 ========
@@ -51,6 +53,7 @@ Use **"random"** for **infile** to generate random input data.
 
 **Available entropy coders (optional):**  
 **-huffman** Use static Huffman entropy coder.   
+**-lzss** Use LZSS entropy encoder. Dictionary size is optional, e.g. **"-lzss16384" (Default is 4k, look-ahead buffer size is 1/8 of dictionary size)
 
 **Examples:**  
 Compress single file:

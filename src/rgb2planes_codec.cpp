@@ -15,7 +15,7 @@ std::string RgbToPlanes::codecName() const
 	return "RGB to planes";
 }
 
-I_Codec * RgbToPlanes::Create()
+RgbToPlanes * RgbToPlanes::Create()
 {
 	return new RgbToPlanes();
 }

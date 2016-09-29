@@ -27,7 +27,7 @@ Bwt * Bwt::Create()
 	return new Bwt();
 }
 
-void Bwt::setBlockSizeForCompression(const uint32_t blockSize)
+void Bwt::setCompressionParameters(const uint32_t blockSize)
 {
 	//clamp to 16MB - 1
 	m_blockSize = blockSize > 16 * 1024 * 1024 - 1 ? 16 * 1024 * 1024 - 1 : blockSize;

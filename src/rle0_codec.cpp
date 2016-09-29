@@ -19,7 +19,7 @@ std::string Rle0::codecName() const
 	return "Zero run-length";
 }
 
-I_Codec * Rle0::Create()
+Rle0 * Rle0::Create()
 {
 	return new Rle0();
 }

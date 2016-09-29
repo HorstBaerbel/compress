@@ -16,7 +16,7 @@ std::string Mtf1::codecName() const
 	return "Move-to-front-1";
 }
 
-I_Codec * Mtf1::Create()
+Mtf1 * Mtf1::Create()
 {
 	return new Mtf1();
 }

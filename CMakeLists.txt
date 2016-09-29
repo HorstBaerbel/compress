@@ -35,6 +35,7 @@ set(TARGET_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/delta_codec.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/huffman_codec.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/huffman_codes.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/lzss_codec.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/mtf1_codec.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/rgb2planes_codec.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/rle0_codec.h
@@ -50,6 +51,7 @@ set(TARGET_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/delta_codec.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/huffman_codec.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/huffman_codes.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/lzss_codec.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/mtf1_codec.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/rgb2planes_codec.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/rle0_codec.cpp

@@ -20,7 +20,7 @@ std::string StaticHuffman::codecName() const
 	return "Static Huffman";
 }
 
-I_Codec * StaticHuffman::Create()
+StaticHuffman * StaticHuffman::Create()
 {
 	return new StaticHuffman();
 }

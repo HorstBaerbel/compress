@@ -13,7 +13,7 @@ std::string Delta::codecName() const
 	return "Delta";
 }
 
-I_Codec * Delta::Create()
+Delta * Delta::Create()
 {
 	return new Delta();
 }

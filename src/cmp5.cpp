@@ -3,10 +3,11 @@
 #include "huffman_codec.h"
 #include "delta_codec.h"
 #include "bwt_codec.h"
-//#include "lzss_codec.h"
+#include "lzss_codec.h"
 #include "mtf1_codec.h"
 #include "rgb2planes_codec.h"
 #include "rle0_codec.h"
+#include "tools.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -438,7 +439,7 @@ int run()
 
 void printVersion()
 {
-	std::cout << "CoMPres5 v0.5" << std::endl << std::endl;
+	std::cout << "CoMPres5 v0.6" << std::endl << std::endl;
 }
 
 void printUsage()
@@ -461,15 +462,16 @@ void printUsage()
 	std::cout << "-rle0 Apply zero run-length encoding." << std::endl;
 	std::cout << "Available entropy coders (optional):" << std::endl;
 	std::cout << "-huffman Use static Huffman entropy coder." << std::endl;
-	//std::cout << "-lzss Use LZSS entropy coder." << std::endl;
 	//std::cout << "-ahuffman Use adaptive Huffman entropy coder." << std::endl;
+	std::cout << "-lzss[dict size] Use LZSS entropy coder. Dictionary size is optional." << std::endl;
+	std::cout << "                 e.g. \"-lzss1024\" (Default is 4096, must be a power of 2)." << std::endl;
 	std::cout << "Examples:" << std::endl;
 	std::cout << "cmp5 -c -huffman ./canterbury/alice29.txt ./alice29.cmp5 (compress file)" << std::endl;
 	std::cout << "cmp5 -d ./alice29.cmp5 ./canterbury/alice29_2.txt (decompress file)" << std::endl;
 	std::cout << "cmp5 -t -bwt -huffman ./canterbury/alice29.txt (test routines)" << std::endl;
 	std::cout << "cmp5 -c -huffman ./canterbury ./compressed (compress files in directory)" << std::endl;
 	std::cout << "cmp5 -c -huffman ./test/*.txt (compress files matching wildcards)" << std::endl;
-	std::cout << "cmp5 -c -v -huffman random (compress random generated data and be verbose)" << std::endl;
+	std::cout << "cmp5 -c -v -lzss random (compress random generated data and be verbose)" << std::endl;
 }
 bool readArguments(int argc, const char * argv[])
 {
@@ -549,7 +551,7 @@ bool readArguments(int argc, const char * argv[])
 						const uint32_t blockSize = std::stoul(blockString);
 						if (blockSize > 0 && blockSize < 16 * 1024 * 1024 - 1)
 						{
-							bwtCodec->setBlockSizeForCompression(blockSize);
+							bwtCodec->setCompressionParameters(blockSize);
 						}
 						else
 						{
@@ -576,18 +578,35 @@ bool readArguments(int argc, const char * argv[])
 				}
 				continue;
 			}
-// 			else if (argument == "-lzss")
-// 			{
-// 				if (m_mode == CompressMode::Compress || m_mode == CompressMode::Test)
-// 				{
-// 					m_codecs.push_back(I_Codec::SPtr(LZSS::Create()));
-// 				}
-// 				else
-// 				{
-// 					std::cout << "Not compressing. Ignoring \"" << argument << "\"." << std::endl;
-// 				}
-// 				continue;
-// 			}
+			else if (argument.find("-lzss") == 0)
+			{
+				if (m_mode == CompressMode::Compress || m_mode == CompressMode::Test)
+				{
+					LZSS::SPtr lzssCodec(LZSS::Create());
+					//check if the user has passed a block size
+					const std::string blockString = argument.substr(5);
+					if (!blockString.empty())
+					{
+						//check if the string can be converted to a number
+						const uint32_t dictSize = std::stoul(blockString);
+						const uint32_t dictBits = Tools::log2(dictSize);
+						if (dictBits >= 4 && dictBits <= 16)
+						{
+							lzssCodec->setCompressionParameters(dictBits, dictBits / 4);
+						}
+						else
+						{
+							std::cout << "Error: Bad dictionary size value \"" << blockString << "\"! Ignoring." << std::endl;
+						}
+					}
+					m_codecs.push_back(lzssCodec);
+				}
+				else
+				{
+					std::cout << "Not compressing. Ignoring \"" << argument << "\"." << std::endl;
+				}
+				continue;
+			}
 			//none of the options was matched until here so we must be past the options
 			pastOptions = true;
 		}
