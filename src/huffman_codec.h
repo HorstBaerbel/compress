@@ -81,7 +81,7 @@ private:
 	/// @param source Source data.
 	/// @param index Index into source data. Will be increased when code lengths are read.
 	/// @return Returns reconstructed Huffman code lengths or invalid/zero code lengths.
-	CodeLengths StaticHuffman::getCodeLengthsFromHeader(const std::vector<uint8_t> & source, uint32_t & index, uint8_t & minLength, uint8_t & maxLength) const;
+	CodeLengths getCodeLengthsFromHeader(const std::vector<uint8_t> & source, uint32_t & index, uint8_t & minLength, uint8_t & maxLength) const;
 
 	/// @brief Return the canonical Huffman codes reconstructed from compressed source data.
 	/// @param source Source data.

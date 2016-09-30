@@ -5,6 +5,8 @@
 #include <vector>
 #include <array>
 #include <iostream>
+#include <algorithm>
+#include <limits>
 
 
 const uint8_t Rle0::CodecIdentifier = 55;
@@ -70,7 +72,7 @@ std::vector<uint8_t> Rle0::encode(const std::vector<uint8_t> & source) const
 				{
 					//yes. count run of zeros
 					uint32_t count = 1;
-					while (srcIndex < srcSize && count < INT_MAX && source[srcIndex] == 0) { ++count; ++srcIndex; }
+					while (srcIndex < srcSize && count < std::numeric_limits<int32_t>::max() && source[srcIndex] == 0) { ++count; ++srcIndex; }
 					//increase count by one
 					count++;
 					//count bits needed to encode run length. subtract one, because the MSB is always 1 and we don't need to store it

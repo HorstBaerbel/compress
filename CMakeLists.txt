@@ -6,15 +6,11 @@ project(cmp5)
 #set up compiler flags and executable names
 #set(CMAKE_CXX_FLAGS "-fPIC") #or -fPIE
 
-if(MSVC)
-    set(CMAKE_DEBUG_POSTFIX "d")
-    add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-    add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") #multi-processor compilation
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP") #multi-processor compilation
-endif()
-
-if(CMAKE_COMPILER_IS_GNUCXX)
+if (${CMAKE_CXX_COMPILER_ID} MATCHES "Clang")
+    #set up compiler flags for Clang
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2") #support C++11 for std::, optimize
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O2 -s") #optimize, strip binary
+elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
     #check for G++ 4.7+
     execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE G++_VERSION)
     if (G++_VERSION VERSION_LESS 4.7)
@@ -22,7 +18,13 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     endif()
     #set up compiler flags for GCC
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O2") #support C++11 for std::, optimize
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -s") #strip binary
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -O2 -s") #optimize, strip binary
+elseif (${CMAKE_CXX_COMPILER_ID} MATCHES "MSVC")
+    set(CMAKE_DEBUG_POSTFIX "d")
+    add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+    add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP") #multi-processor compilation
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP") #multi-processor compilation
 endif()
 
 #-------------------------------------------------------------------------------
@@ -69,3 +71,7 @@ set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 #define target
 
 add_executable(cmp5 ${TARGET_SOURCES} ${TARGET_HEADERS})
+
+if (${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
+    target_link_libraries (cmp5 stdc++fs)
+endif()

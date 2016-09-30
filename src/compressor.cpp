@@ -10,6 +10,7 @@
 #include "tools.h"
 
 #include <iostream>
+#include <algorithm>
 
 
 const uint32_t Compressor::MagicHeader = 0x434D5035; //"CMP5" == "CoMPre5sor" data version 5

@@ -15,8 +15,15 @@
 #include <string>
 #include <iomanip>
 #include <fstream>
-#include <filesystem>
 #include <regex>
+
+#if defined(__GNUC__) || defined(__clang__)
+    #define FS_NAMESPACE std::experimental::filesystem
+    #include <experimental/filesystem>
+#elif defined(_MSC_VER)
+    #define FS_NAMESPACE FS_NAMESPACE
+    #include <filesystem>
+#endif
 
 enum CompressMode { None, Compress, Decompress, Test };
 CompressMode m_mode = None;
@@ -24,8 +31,8 @@ bool m_beVerbose = false;
 bool m_doBenchmark = false;
 bool m_doTest = false;
 bool m_useDirectories = false;
-std::tr2::sys::path m_inputPath; //input file name.
-std::tr2::sys::path m_outputPath; //output file name.
+FS_NAMESPACE::path m_inputPath; //input file name.
+FS_NAMESPACE::path m_outputPath; //output file name.
 std::ofstream m_badOfStream; //we need this later as a default parameter...
 std::vector<I_Codec::SPtr> m_codecs; //list of codes to use for compression
 
@@ -62,7 +69,7 @@ std::vector<uint8_t> generateRandomData()
 	return result;
 }
 
-std::vector<uint8_t> readFileContent(const std::tr2::sys::path & fileName)
+std::vector<uint8_t> readFileContent(const FS_NAMESPACE::path & fileName)
 {
 	//check if the file name is "random"
 	if (fileName.string() == "random")
@@ -71,16 +78,16 @@ std::vector<uint8_t> readFileContent(const std::tr2::sys::path & fileName)
 	}
 	std::cout << "Opening \"" << fileName << "\"" << std::endl;
 	//check if the file exists
-	if (std::tr2::sys::exists(fileName))
+	if (FS_NAMESPACE::exists(fileName))
 	{
 		//check if it isn't empty or too big for us
-		const auto fileSize = std::tr2::sys::file_size(fileName);
+		const auto fileSize = FS_NAMESPACE::file_size(fileName);
 		if (fileSize == 0)
 		{
 			std::cout << "File is empty!" << std::endl;
 			return std::vector<uint8_t>();
 		}
-		else if (fileSize < INT_MAX)
+		else if (fileSize < std::numeric_limits<int32_t>::max())
 		{
 			//try opening file
 			std::ifstream in(fileName, std::ios_base::in | std::ios_base::binary);
@@ -119,7 +126,7 @@ std::vector<uint8_t> readFileContent(const std::tr2::sys::path & fileName)
 	return std::vector<uint8_t>();
 }
 
-bool writeFileContent(const std::tr2::sys::path & fileName, const std::vector<uint8_t> & data)
+bool writeFileContent(const FS_NAMESPACE::path & fileName, const std::vector<uint8_t> & data)
 {
 	//try opening file
 	std::ofstream out(fileName, std::ios_base::out | std::ios_base::trunc | std::ios_base::binary);
@@ -149,7 +156,7 @@ bool writeFileContent(const std::tr2::sys::path & fileName, const std::vector<ui
 
 //-------------------------------------------------------------------------------------------------
 
-int compress(const std::tr2::sys::path & input, const std::tr2::sys::path & output)
+int compress(const FS_NAMESPACE::path & input, const FS_NAMESPACE::path & output)
 {
 	//read file data
 	std::vector<uint8_t> source = readFileContent(input);
@@ -180,7 +187,7 @@ int compress(const std::tr2::sys::path & input, const std::tr2::sys::path & outp
 	return -1;
 }
 
-int decompress(const std::tr2::sys::path & input, const std::tr2::sys::path & output)
+int decompress(const FS_NAMESPACE::path & input, const FS_NAMESPACE::path & output)
 {
 	//read file data
 	std::vector<uint8_t> source = readFileContent(input);
@@ -210,7 +217,7 @@ int decompress(const std::tr2::sys::path & input, const std::tr2::sys::path & ou
 	return -1;
 }
 
-int test(const std::tr2::sys::path & input)
+int test(const FS_NAMESPACE::path & input)
 {
 	//read file data
 	std::vector<uint8_t> source = readFileContent(input);
@@ -294,22 +301,22 @@ int test(const std::tr2::sys::path & input)
 int run()
 {
 	//first check wether we have a directory, regular file, or wildcards
-	if (std::tr2::sys::is_directory(m_inputPath))
+	if (FS_NAMESPACE::is_directory(m_inputPath))
 	{
 		//check if input is sufficient
-		if (m_mode == CompressMode::Compress && !std::tr2::sys::is_directory(m_outputPath))
+		if (m_mode == CompressMode::Compress && !FS_NAMESPACE::is_directory(m_outputPath))
 		{
 			std::cout << "Error: Invalid output directory for compression!" << std::endl;
 			return -2;
 		}
-		else if (m_mode == CompressMode::Decompress && !std::tr2::sys::is_directory(m_outputPath))
+		else if (m_mode == CompressMode::Decompress && !FS_NAMESPACE::is_directory(m_outputPath))
 		{
 			std::cout << "Error: Invalid output directory for decompression!" << std::endl;
 			return -2;
 		}
 		//loop through directory
-		std::tr2::sys::directory_iterator endIt;
-		std::tr2::sys::directory_iterator dirIt(m_inputPath);
+		FS_NAMESPACE::directory_iterator endIt;
+		FS_NAMESPACE::directory_iterator dirIt(m_inputPath);
 		for (; dirIt != endIt; ++dirIt)
 		{
 			//get next file and check if it is a regular file
@@ -318,7 +325,7 @@ int run()
 			if (is_regular_file(inFilePath))
 			{
 				//build output file name from output directory and input file name
-				std::tr2::sys::path outFilePath = m_outputPath;
+				FS_NAMESPACE::path outFilePath = m_outputPath;
 				outFilePath /= inFilePath.filename();
 				if (m_mode == CompressMode::Compress)
 				{
@@ -342,15 +349,15 @@ int run()
 		//when we get here, everything was fine for all files
 		return 0;
 	}
-	else if (std::tr2::sys::is_regular_file(m_inputPath))
+	else if (FS_NAMESPACE::is_regular_file(m_inputPath))
 	{
 		//check if input is sufficient
-		if (m_mode == CompressMode::Compress && (std::tr2::sys::exists(m_outputPath) && !std::tr2::sys::is_regular_file(m_outputPath)))
+		if (m_mode == CompressMode::Compress && (FS_NAMESPACE::exists(m_outputPath) && !FS_NAMESPACE::is_regular_file(m_outputPath)))
 		{
 			std::cout << "Error: Invalid output file for compression!" << std::endl;
 			return -2;
 		}
-		else if (m_mode == CompressMode::Decompress && (std::tr2::sys::exists(m_outputPath) && !std::tr2::sys::is_regular_file(m_outputPath)))
+		else if (m_mode == CompressMode::Decompress && (FS_NAMESPACE::exists(m_outputPath) && !FS_NAMESPACE::is_regular_file(m_outputPath)))
 		{
 			std::cout << "Error: Invalid output file for decompression!" << std::endl;
 			return -2;
@@ -375,12 +382,12 @@ int run()
 		if (std::find(fileName.cbegin(), fileName.cend(), '*') != fileName.cend())
 		{
 			//seems so. check if input is sufficient
-			if (m_mode == CompressMode::Compress && !std::tr2::sys::is_directory(m_outputPath))
+			if (m_mode == CompressMode::Compress && !FS_NAMESPACE::is_directory(m_outputPath))
 			{
 				std::cout << "Error: Invalid output directory for compression!" << std::endl;
 				return -2;
 			}
-			else if (m_mode == CompressMode::Decompress && !std::tr2::sys::is_directory(m_outputPath))
+			else if (m_mode == CompressMode::Decompress && !FS_NAMESPACE::is_directory(m_outputPath))
 			{
 				std::cout << "Error: Invalid output directory for decompression!" << std::endl;
 				return -2;
@@ -388,22 +395,23 @@ int run()
 			//build regular expression from wildcards
 			replaceAll(fileName, ".", "\\.");
 			replaceAll(fileName, "*", ".*");
-			std::regex fileRegEx(fileName);
+			const std::regex fileRegEx(fileName);
 			//get directory from input path
-			auto directoryPath = m_inputPath.remove_filename();
+			const auto directoryPath = m_inputPath.remove_filename();
 			//loop through directory
-			std::tr2::sys::directory_iterator endIt;
-			std::tr2::sys::directory_iterator dirIt(directoryPath);
+			FS_NAMESPACE::directory_iterator endIt;
+			FS_NAMESPACE::directory_iterator dirIt(directoryPath);
 			for (; dirIt != endIt; ++dirIt)
 			{
 				//get next file, check if it is a regular file and matches our wildcards
 				int result = 0;
 				auto & inFilePath = dirIt->path();
+                const std::string inFileName = inFilePath.filename();
 				std::smatch dummyMatch;
-				if (is_regular_file(inFilePath) && std::regex_match(inFilePath.filename(), dummyMatch, fileRegEx))
+				if (is_regular_file(inFilePath) && std::regex_match(inFileName, dummyMatch, fileRegEx))
 				{
 					//build output file name from output directory and input file name
-					std::tr2::sys::path outFilePath = m_outputPath;
+					FS_NAMESPACE::path outFilePath = m_outputPath;
 					outFilePath /= inFilePath.filename();
 					if (m_mode == CompressMode::Compress)
 					{
@@ -635,9 +643,9 @@ bool readArguments(int argc, const char * argv[])
 				}
 				//check if the argument is a directory
 				m_outputPath = argument;
-				if ((std::tr2::sys::is_directory(m_inputPath) && std::tr2::sys::is_directory(m_outputPath)) ||
-					 (std::tr2::sys::is_regular_file(m_inputPath) && std::tr2::sys::is_regular_file(m_outputPath)) ||
-					 (std::tr2::sys::is_regular_file(m_inputPath) && !std::tr2::sys::exists(m_outputPath)))
+				if ((FS_NAMESPACE::is_directory(m_inputPath) && FS_NAMESPACE::is_directory(m_outputPath)) ||
+					 (FS_NAMESPACE::is_regular_file(m_inputPath) && FS_NAMESPACE::is_regular_file(m_outputPath)) ||
+					 (FS_NAMESPACE::is_regular_file(m_inputPath) && !FS_NAMESPACE::exists(m_outputPath)))
 				{
 					pastOutput = true;
 				}
@@ -662,9 +670,9 @@ bool readArguments(int argc, const char * argv[])
 	//if we compress or decompress we need a second argument
 	if (m_mode == CompressMode::Compress || m_mode == CompressMode::Decompress)
 	{
-		if (!(std::tr2::sys::is_directory(m_inputPath) && std::tr2::sys::is_directory(m_outputPath)) &&
-			 !(std::tr2::sys::is_regular_file(m_inputPath) && std::tr2::sys::is_regular_file(m_outputPath)) &&
-			 !(std::tr2::sys::is_regular_file(m_inputPath) && !std::tr2::sys::exists(m_outputPath)))
+		if (!(FS_NAMESPACE::is_directory(m_inputPath) && FS_NAMESPACE::is_directory(m_outputPath)) &&
+			 !(FS_NAMESPACE::is_regular_file(m_inputPath) && FS_NAMESPACE::is_regular_file(m_outputPath)) &&
+			 !(FS_NAMESPACE::is_regular_file(m_inputPath) && !FS_NAMESPACE::exists(m_outputPath)))
 		{
 			std::cout << "Error: Compression and decompression need an <outfile>!" << std::endl;
 			return false;

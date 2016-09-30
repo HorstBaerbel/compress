@@ -42,10 +42,14 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-# Build directories
+# Build files and directories
 build/
 Debug/
 Release/
+CMakeFiles/
+CMakeCache.txt
+Makefile
+cmake_install.cmake
 
 # Test data directories
 canterbury/
