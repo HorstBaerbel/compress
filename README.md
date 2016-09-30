@@ -27,7 +27,7 @@ cmake .
 make
 </pre>
 
-G++ 4.7 / VS2013 or higher (for C++11) will be needed to compile CoMPres5. Support for std::filesystem (via std::tr2::filesystem) is needed. For installing G++ 4.7 see [here](http://lektiondestages.blogspot.de/2013/05/installing-and-switching-gccg-versions.html).
+G++ 5.3 / VS2013 or higher will be needed to compile CoMPres5. Support for C++11 and std::filesystem (via std::tr2::filesystem or std::experimental::filesystem) is needed. For installing a new G++ see [here](http://lektiondestages.blogspot.de/2013/05/installing-and-switching-gccg-versions.html).
 
 Usage
 ========

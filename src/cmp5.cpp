@@ -21,7 +21,7 @@
     #define FS_NAMESPACE std::experimental::filesystem
     #include <experimental/filesystem>
 #elif defined(_MSC_VER)
-    #define FS_NAMESPACE FS_NAMESPACE
+    #define FS_NAMESPACE std::tr2::sys
     #include <filesystem>
 #endif
 
