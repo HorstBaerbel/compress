@@ -18,11 +18,11 @@
 #include <regex>
 
 #if defined(__GNUC__) || defined(__clang__)
-    #define FS_NAMESPACE std::experimental::filesystem
-    #include <experimental/filesystem>
+	#include <experimental/filesystem>
+	namespace FS_NAMESPACE = std::experimental::filesystem;
 #elif defined(_MSC_VER)
-    #define FS_NAMESPACE std::tr2::sys
-    #include <filesystem>
+	#include <filesystem>
+	namespace FS_NAMESPACE = std::tr2::sys;
 #endif
 
 enum CompressMode { None, Compress, Decompress, Test };
